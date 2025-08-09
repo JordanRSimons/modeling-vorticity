@@ -1,6 +1,6 @@
 # Introduction to the Problem
 
-This notebook represents the first step in our analysis. Our goal in this project is to test an ocean model called Lagrangian Gradient Regression, which computes a measure of rotation called vorticity from soley particle trajectory data. Before we can generate test particle trajectories, we need to initialize particles. With our curved simulated coastline, a simple grid is not sufficient for particle seeding: Instead, we want to seed the particles along contours of ocean depth. 
+This notebook represents the first step in our analysis. Our goal in this project is to test an ocean model called Lagrangian Gradient Regression, which computes a measure of rotation called vorticity from soley particle trajectory data (Harms et al. 2023). Before we can generate test particle trajectories, we need to initialize particles. With our curved simulated coastline, a simple grid is not sufficient for particle seeding: Instead, we want to seed the particles along contours of ocean depth. 
 
 So you can understand where we are going, here is our final distribution of the particles' initial positions. For more plots, and the code for this plot, please see the next notebook (02_analysis_and_plotting.md).
 
@@ -176,7 +176,7 @@ With this cumulative sum, we can then derive an array of increasing distances fr
         xvals = np.concatenate([xvals, xvalsc])
         yvals = np.concatenate([yvals, yvalsc])
 
-        return xvals,yvals
+    return xvals,yvals
 ```
 
 The starting positions have been set, and we can now utilize the flow data contained in our dataset to produce test particle trajectory data to which LGR can be applied.
