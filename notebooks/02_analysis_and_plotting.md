@@ -44,7 +44,7 @@ The similarities of the two plots, especially within the dashed line where the t
 
 ![LGR vs. ROMS Plot](../images/errorPlots.png)
 
-To more rigorously define the effectiveness of LGR relative to ROMS, we performed a root mean squared error (rmse) analysis (described more in the Data Manipulation and Statistical Analysis section below). For the sake of these tests, we assumed that the highly tested and frequently used ROMS model was perfectly accurate, and compared our LGR outputs with a vareity of initial conditions to the ROMS output.
+To more rigorously define the effectiveness of LGR relative to ROMS, we performed a root mean squared error (rmse) analysis (described more in the Vorticity Computation and Statistical Analysis sections below). For the sake of these tests, we assumed that the highly tested and frequently used ROMS model was perfectly accurate, and compared our LGR outputs with a vareity of initial conditions to the ROMS output.
 
 This plot shows the results of those tests. In the first plot, the number of seeded particles was kept at 1200, but the number of depth contours, or isobaths, on which particles were seeded was varied (the larger the distance between isobaths, the fewer isobaths were used). The relative error was minimized when the distance between isobaths was just under a meter, leading to the spacing seen in the other plots.
 
@@ -252,7 +252,7 @@ As this plot has two panes, we use plt.subplot, creating each plot on separate a
 fig, (ax1, ax2) = plt.subplots(nrows = 2, ncols = 1, sharex = True, constrained_layout = True, figsize = (14,14), dpi = 1200) 
 ```
 
-The top panel, showing ROMS vorticity, is a standard matplotlib pcolormesh. The data variable romvortmean's creation appears in the Data Manipulation section below.
+The top panel, showing ROMS vorticity, is a standard matplotlib pcolormesh. The data variable romvortmean's creation appears in the Vorticity Computation section below.
 
 ```python
 romvmeanplt = ax1.pcolormesh(X, Y, romvortmean, cmap = cmocean.cm.balance, 
@@ -279,7 +279,7 @@ ax1.set_aspect("equal")
 
 The two plots use a shared colorbar, which uses a symetric logarithmic scaling with even bounds on each side to address the negative and positive vorticities not having precisely the same maximum absolute magnitude. 
 
-The data variable vort_nofilter contains the LGR vorticity data, and will again be derived in the Data Manipulation section.
+The data variable vort_nofilter contains the LGR vorticity data, and will again be derived in the Vorticity Computation section.
 
 ```python
 vmin, vmax = -np.nanmax(vort), np.nanmax(vort)
@@ -342,7 +342,7 @@ plt.close()
 
 ### Plot 4: LGR Error
 
-This plot itself uses standard matplotlib subplot code. Derivations of the data variables involved can be found in the Data Manipulation and Statistical Analysis section below.
+This plot itself uses standard matplotlib subplot code. Derivations of the data variables involved can be found in the Vorticity Computation and Statistical Analysis sections below.
 
 ```python
 # subplots using the same y axis scale
@@ -416,7 +416,7 @@ y_rho = dsCDF.y_rho[:,0].values
 Xrho, Yrho = np.meshgrid(x_rho, y_rho)
 ```
 
-Now, we enter the for loop. The dataframe df is generated in the LGR vorticity computation code described in the Data Manipulation section below. Here, it is used to obtain trajectory information in place of dsTRAJ.
+Now, we enter the for loop. The dataframe df is generated in the LGR vorticity computation code described in the Vorticity Computation section below. Here, it is used to obtain trajectory information in place of dsTRAJ.
 
 ```python
 for i in range(len(df['positions'])) :
@@ -481,23 +481,179 @@ ffmpeg -i image-%04d.png -vf palettegen palette.png
 ffmpeg -framerate 10 -i image-%04d.png -i palette.png -lavfi paletteuse hour.gif
 ```
 
-# Data Manipulation and Statistical Analysis - Code Walkthough
+# Vorticity Computation - Code Walkthough
 
-# OLD TEXT
+For completeness, this section will describe how the trajectory data in the previous notebook (01_generate_particle_data.md) is used to compute and compile the vorticity data used in the above plots.
 
+First, the ROMS vorticiy is actually contained in dsCDF already. It is computed directly from our simulated water speed. Mathematically, vorticity is defined to be the curl of a flow field: $ \omega := \nabla V $ 
 
-In this notebook, our goal is to compare the performance of two methods of computing vorticity, a measure of rotation in ocean currents. We want to test the effectiveness of a novel method, Lagrangian Gradient Regression (Harms et al. 2023), which computes vorticity soley from trajectory data of test particles in the ocean, against an established ocean model called ROMS.
+In other words, vorticity mathematically quantifies the degree to which a vector field (like in Plot 1) circulates around any given point. Since we have a full flow vector field already in our simulated environment, ROMS easily performs the needed computation, and we can just read in the output.
 
-If that previous paragraph didn't make complete sense to you, you're not alone. A key part of this project was finding ways to generate clear visualizations to illustrate our findings to a broader audience. For this reason, this notebook will be in reverse order, starting with a discussion of our final results and visualizations before returning to a more technical discussion of how we prepared our data, starting where this technical discussion left off in the previous notebook (01_generate_particle_data.md).
+```python
+romvort = dsCDF['ω_bar'].values
+```
 
+The LGR vorticity computation relies on a slightly altered version of the LGR model developed by Harms et al., the original proprietary code for which I cannot share here. 
 
+We import their model code:
 
+```python
+from LGR_altered.lgr import *
+from LGR_altered.jacobian import *
+from LGR_altered.classes import *
+from LGR_altered.plotting import *
+```
 
+Before the computations run, there is some setup required. The first step is to define our regression method. For this analysis, we use radial Gaussian regression.
 
-test Lagrangian Gradient Regression vs. ROMS
+```python
+# Generate the regression function
+regfun = setRegressionFunction(kernel=reg_type, lam=lam, sig=sigma)
+```
+Next, the data from dsTRAJ (the trajectory data from the previous notebook) is used to create an array called particleList, which catalogues each particle as a SimpleParticle class object with position and time data as atributes. The other parameter kNN determines how many neighboring particles to use in the regression. We set kNN = 5.
 
-In the last notebook, we used the did technical stuff.
+We also obtain a count of particles.
 
-data import - sps, pivot to the data format
+```python
+# Generate a data frame
+df = generateDF(particleList, kNN)
+n_particles = len(df['indices'][0])
+```
 
-model
+Now, we can run the full model. 
+
+```python
+# Perform the regressions
+calcJacobianAndVelGrad(df, regfun=regfun)
+
+# Compute the metrics on each particle trajectory
+# The primary metric of interest is LGR vorticity
+computeMetrics(df, t, metric_list=metrics)
+
+# drop the last row as it is prone to errors
+df = df[:-1]
+```
+In a rough sense, what these functions do is at each time step, record the direction of motion of every particle relative to the five nearest other particles, weighted by distance, and from these rates of change compute vorticity, the amout of relative rotation. 
+
+Mathematically, at every point, our goal is to compute vorticity in the same way as with ROMS, using the formula $ \omega := \nabla V $. However, starting from just trajectory data, we don't have the necessary vector field V. Instead, we approximate it via a complex process using Gaussian-weighted regression. As time progresses one small step, we track the change in distances between each particle and its 5 nearest neighbors. Regression then gives a matrix which best transforms the old positions to the new ones, an approximate flow matrix. At any given timestep, a composition of these flow matrices gives an approximation of $\nabla V$, allowing vorticity to be approximated.
+
+Continuing to set up the data for statistical analysis, the LGR vorticity data needs to be interpolated back onto our simulation's gridded coordinates, used by ROMS.
+
+```python
+# this generates the meshgrid from the x and y values of the LGR model grid
+# we make the grid sparcer for efficiency
+xvec = dsCDF.x_psi[0,:].values 
+yvec = dsCDF.y_psi[:,0].values 
+
+gridvectors = [xvec, yvec]
+
+# choose interpolation method based on the number of particles
+if n_particles < 2000:  
+    generateFields(df, gridvectors, approach='rbf', method='multiquadric', smooth = smooth)
+    interpstr = 'rbf_mq'
+else:
+    generateFields(df, gridvectors, approach='interp', method='cubic')
+    interpstr = 'int3'
+```
+
+The critical parameter which I added to the generateFields function was the smoothing parameter. When interpolating data to fit a grid, especially when the computed data is concentrated only around where the particles currently are, requires the computer to "guess" at how to fill in the empty regions. Adding the smoothing parameter greatly reduces extranious values in the corners of the plot.
+
+We can then extract the LGR vorticity, called vort in this code. A raw unfiltered copy is made, vort_nofilter, which is the data variable in the LGR panel in Plot 3.
+
+```python
+### our computed quantities
+# .loc selects a timestep, and the scalarfields column. Each element is a dictionary, so we pull out the one we want
+# Each dictionary contains a 2d array array, horizontal values in rows, vertical values in columns, used for plotting
+vort = np.squeeze(df.loc[tstep, 'ScalarFields']['vort'])
+vort_nofilter = np.copy(vort)
+```
+
+Finally, to make the ROMS vorticity data be more similar in precision to the interpolated LGR vorticity data, we "smooth" it as well, by replacing each value on the plot with the local mean of the surrounding 5 by 5 box of values, along with some operations to handle some edge cases NaNs.
+
+```python
+# where romvort is nan, plug in 0, otherwise keep the original value
+# this will prevent NaNs from interering with the local means
+romvort_nonan = np.where( np.isnan(romvort), 0, romvort)
+
+# a grid with NaNs as NaN, and 0s elsewhere
+romvort_nans = np.where(np.isnan(romvort), np.nan, 0)
+
+# take the local mean at every point
+romvortmean = uniform_filter(romvort_nonan, size = 5, mode = 'nearest')
+
+# create a version of romvortmean where every nan value is put back in place after the computation
+# number + NaN = NaN
+romvortmean_nans = romvortmean + romvort_nans
+```
+
+The romvortmean varaible is the data variable in the ROMS panel in Plot 3.
+
+# Statistical Analysis - Code Walkthough
+
+We are now in a position to explain the details behind the statistical analyses in Plot 4.
+
+The errors themselves are computed via the mean L2 norm, or root mean squared error (rmse). The ROMS data is treated as the theoretical, correct, value while the LGR data is considered experimental.
+
+The equation for the computation is as follows:
+
+$ \text{rmse} = \sum^n_{i=0} \sqrt { \frac{(\text{LGR}[i] - \text{ROMS}[i])^2} {n} }$
+
+We take the differences, square them, take the root, and take the mean, hence the name root mean squared error.
+
+```python
+errorMesh = (vort - romvortmean_nans)**2
+meanl2norm = round( np.sqrt(np.nansum(errorMesh)/ np.count_nonzero(~np.isnan(errorMesh))), 5) 
+```
+
+This code performs this computation efficiently by creating a mesh with the error at every point then summing the full mesh and dividing by the count. 
+
+For a variety of configurations, I performed this computation, as well as a similar computation of correlation, and recorded the results in a csv.
+
+```python
+dsError = pd.read_csv('/Users/jordan/Library/.../CICOES/data/errorData.csv')
+
+# filter out negative correlation values and the ncont = 600 case
+ds_poscorr = dsError[(dsError['corr'] > 0) & (dsError['ncont'] < 600)] 
+
+# extract the columns of interest
+ncont = ds_poscorr[['ncont']].to_numpy().T[0]
+rmse = ds_poscorr[['rmse']].to_numpy().T[0]
+corr = ds_poscorr[['corr']].to_numpy().T[0]
+```
+
+The final task requried to create Plot 4 was to create an error time series for the lower panel.
+
+```python
+times = []
+rmse_t = []
+corr_t = []
+
+# loop over the total number of time steps
+for i in range(len(df['positions'])) :
+    
+    # sometimes the last few datapoints are flawed, we want to exit the loop without an error when this happens
+    try :
+        # .loc selects a timestep, and the scalarfields column. Each element is a dictionary, so we pull out the one we want
+        # Each dictionary contains a 2d array array, horizontal values in rows, vertical values in columns, used for plotting
+        vorti = np.squeeze(df.loc[i, 'ScalarFields']['vort'])
+        vorti[ dsCDF['h_psi'][:,::cff] >= 10 ] = np.nan
+    except :
+        break
+    
+    vortveci = vorti.flatten()
+    romvortveci = romvortmean_nans.flatten()
+    
+
+    errorMeshi = (vorti - romvortmean_nans)**2
+    meanl2normi = round( np.sqrt(np.nansum(errorMeshi)/ np.count_nonzero(~np.isnan(errorMeshi))), 5) 
+    
+    maski = ~np.isnan(romvortveci) & ~np.isnan(vortveci)
+    
+    corri = round(stats.linregress(romvortveci[maski], vortveci[maski]).rvalue, 3)
+
+    times.append(i*sps/60)
+    rmse_t.append(meanl2normi)
+    corr_t.append(corri)
+```
+
+We have now created all data variables contained in Plot 4.
