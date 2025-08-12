@@ -1,11 +1,11 @@
-# Vorticity Modeling and Analysis - A Case Study
+# Vorticity Modeling and Analysis
 
-When waves approach the coastline, they can create complex circulating current patterns that trap ocean wildlife. Measuring these circulation patterns therefore benefits both oceanographers and ecologists. Scientists have recently developed a tool to compute vorticity by tracking how sensor buoys placed in the water move (Harms et al. 2023). The goal of this project is to compare this new model to more established ones while attempting to minimize the number of buoys required to get accurate results.
+When waves approach the coastline, they can create complex circulating current patterns that trap ocean wildlife. Quantifying these circulation patterns with a metric called vorticity could benefit both oceanographers and ecologists. Scientists have recently developed a tool to compute vorticity by tracking the movements of sensor buoys placed in the water (Harms et al. 2023). The goal of this project was to benchmark this new model against more established ones in order to minimize the number of buoys required to get accurate results.
 
 The animation below shows an example of simulated buoys, also called test particles, following a circulating current. The white peninsulas represent land and the waves originate from the top of the plot.
 
 ![Particle Animation](images/hour.gif)
-*An animation tracking 1200 simulated test particles (buoys) along a coastline over an hour on top of a static plot of vorticity. The off-white color represents land. See [notebook 1](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/01_visualizations_and_results.md) for details.*
+*An animation tracking 1200 simulated test particles (buoys) along a coastline over an hour. The off-white color represents land ad the colored regions depict vorticity. See [notebook 1](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/01_visualizations_and_results.md) for details.*
 
 # Repo Contents
 
