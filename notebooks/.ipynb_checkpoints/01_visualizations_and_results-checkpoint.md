@@ -1,12 +1,12 @@
 # Introduction
 
-This notebook compares the performance of two methods of computing vorticity, a measure of rotation in ocean currents. These currents are caused by waves approaching the coastline, which is marked as white in our simulations.
+This notebook compares the performance of two methods of computing vorticity, a measure of rotation in ocean currents. These currents are caused by waves approaching the coastline, which is marked as white in my simulations.
 
-We adapted a novel vorticity computation method called Lagrangian Gradient Regression (LGR; Harms et al. 2023), which computes vorticity by tracking the positions of sensor buoys placed in the water. Our goal is to compare these outputs to a more established ocean model called ROMS.
+I adapted a novel vorticity computation method called Lagrangian Gradient Regression (LGR; Harms et al. 2023), which computes vorticity by tracking the positions of sensor buoys placed in the water. My goal is to compare these outputs to a more established ocean model called ROMS.
 
-This notebook will begin with a discussion of our results, supported with visualizations I created to provide clarity. Then, I will give the code for the plots. More technical details about how the models function can be found in [notebook 2](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md).
+This notebook will begin with a discussion of my results, supported with visualizations I created to provide clarity. Then, I will give the code for the plots. More technical details about how the models function can be found in [notebook 2](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md).
 
-We will start with the visualizations I created to make the results clear to a broad audience. Later parts of the notebook will provide code for the plots, then expand on the technical details of how we computed vorticity and the statistical metrics used in the plots.
+I will start with the visualizations I created to make the results clear to a broad audience. Later parts of the notebook will provide code for the plots, then expand on the technical details of how I computed vorticity and the statistical metrics used in the plots.
 
 # Visualizing Vorticity - Plot Design and Experiment Results
 
@@ -17,9 +17,9 @@ Code for these plots will follow in the next section.
 ![Trajectory Plot](../images/quiver.png)
 *Plot 1: A vector plot showing the direction of currents caused by wind-driven waves approaching a coastline (land is off-white). See text for details.*
 
-Our simulations took place in an idealized coastal environment, where consistent wind-driven waves create complex flow patterns.
+My simulations took place in an idealized coastal environment, where consistent wind-driven waves create complex flow patterns.
 
-Two features of this plot are designed to stand out against the dark color scheme: The land, in white, and the breaking wave motion, in dark red. This ensures that the viewer can quickly center themselves on a simple, broad picture: We are simulating waves breaking against a coastline.
+Two features of this plot are designed to stand out against the dark color scheme: The land, in white, and the breaking wave motion, in dark red. This ensures that the viewer can quickly center themselves on a simple, broad picture: I am simulating waves breaking against a coastline.
 
 The vectors on the plot show the direction and speed of the complex currents which result from the waves approaching the coast. The patterns are distinctly circular, rotating, intuitively connecting to vorticity.
 
@@ -30,7 +30,7 @@ Finally, the color gradient of the plot shows the speed, providing quantifyable 
 ![Trajectory Plot](../images/trajectories.png)
 *Plot 2: A plot showing simulated tracks of test particles driven by wind-created waves in a simulated coastline over an hour.* 
 
-As discussed in [notebook 2](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md), LGR computes vorticity from the trajectories of floating test particles in the ocean. We will be using simulated particle trajectories (simulated buoys) to perform our test of LGR.
+As discussed in [notebook 2](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md), LGR computes vorticity from the trajectories of floating test particles in the ocean. I will be using simulated particle trajectories (simulated buoys) to perform this test of LGR.
 
 This plot demonstrates what would happen if a particle was thrown into the currents shown in the last plot. Starting at the initial seeding positions (the red dots), the trajectories follow by simply tracing a path along the vectors in the last plot. This is actually a remarkably good analogue for how this computation actually works, numerically integrating a system of differential equations.
 
@@ -45,14 +45,14 @@ This plot shows the results of the LGR vorticity computation alongside the outpu
 
 The plots' bimodal color scheme helps show that the magnitude of vorticity represents rotation speed and that the sign (positive or negative) of vorticity represents rotation direction.
 
-The similarities of the two plots, especially inside the dashed line signifying the edge of where particles were seeded, support our conclusion that LGR has potential as a vorticity computation method.
+The similarities of the two plots, especially inside the dashed line signifying the edge of where particles were seeded, support my conclusion that LGR has potential as a vorticity computation method.
 
 ### Plot 4: LGR Error
 
 ![LGR vs. ROMS Plot](../images/errorPlots.png)
 *Plot 4: A pair of plots showing statistical analyses of the effectiveness of LGR vorticity computation with a variety of seeding schemes (top) and over time (bottom). See text for details.* 
 
-To more rigorously define the effectiveness of LGR relative to ROMS, we performed a root mean squared error (rmse) analysis (described in more detail in the Statistical Analysis section of [notebook 2](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md)). For the sake of these tests, we assumed that the highly tested and frequently used ROMS model was perfectly accurate, and compared our LGR outputs with a variety of initial conditions to the ROMS output.
+To more rigorously define the effectiveness of LGR relative to ROMS, I performed a root mean squared error (rmse) analysis (described in more detail in the Statistical Analysis section of [notebook 2](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md)). For the sake of these tests, I assumed that the highly tested and frequently used ROMS model was perfectly accurate, and compared my LGR outputs with a variety of initial conditions to the ROMS output.
 
 This plot shows the results of those tests. In the first plot, the number of seeded particles was kept at 1200, but the number of depth contours, or isobaths, on which particles were seeded was varied (the larger the distance between isobaths, the fewer isobaths were used). The relative error was minimized when the distance between isobaths was just under a meter, leading to the spacing seen in the other plots.
 
@@ -65,13 +65,13 @@ The second plot shows that as time advances (from the lowest error initial spaci
 
 These previous analyses put together confirmed that LGR can effectively compute vorticity, and can perform as well as ROMS under certain conditions. However, the quick increase in error as time progresses raises concerns about the applicability of this approach in the field.
 
-This animation aims to diagnose the causes of these discrepancies. We believe that the error increases over time because, as this animation shows, the particles quickly form clusters, leaving other areas blank. After about 15 minutes, the waters near the central coastlines (with the highest vorticity values) are flushed clean, corresponding to the breakdown in accuracy. These high speeds can also be seen graphically in Plot 1.
+This animation aims to diagnose the causes of these discrepancies. I believe that the error increases over time because, as this animation shows, the particles quickly form clusters, leaving other areas blank. After about 15 minutes, the waters near the central coastlines (with the highest vorticity values) are flushed clean, corresponding to the breakdown in accuracy. These high speeds can also be seen graphically in Plot 1.
 
 This implies that LGR can be best used in places with slower water motion, where the test particles will maintain optimal coverage longer.
 
 # Visualizing Vorticity - Plot Code Walkthrough
 
-This section will provide a walkthrough of the Python code I wrote to create these visualizations. We will use the following libraries:
+This section will provide a walkthrough of the Python code I wrote to create these visualizations. I will use the following libraries:
 
 ```python
 import xarray as xr
@@ -88,7 +88,7 @@ from scipy import stats
 from scipy.ndimage import median_filter, uniform_filter
 ```
 
-dsCDF is a multidimensional dataset in the netCDF format which contains information about our simulated coastline's water's depth and motion.
+dsCDF is a multidimensional dataset in the netCDF format which contains information about my simulated coastline's water's depth and motion.
 
 dsTRAJ contains simulated particle trajectories, whose generation is explained in [notebook 2](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md).
 
@@ -106,7 +106,7 @@ dsCDF = xr.load_dataset('/Users/jordan/Documents/CICOES/data/cape_large_00.nc', 
 
 ### Plot 1: Waves
 
-We extract relevant data from dsCDF; for the matplotlib pcolormesh plot of speed, we will need x and y coordinates, alongside velocities in the x and y directions, denoted with U and V in this dataset. These variables use the psi positional coordinates.
+I extract relevant data from dsCDF; for the matplotlib pcolormesh plot of speed, I will need x and y coordinates, alongside velocities in the x and y directions, denoted with U and V in this dataset. These variables use the psi positional coordinates.
 
 ```python
 # unfiltered versions of velocity/coordinates for pcolormesh
@@ -119,7 +119,7 @@ Vfull = dsCDF.vbar_lagrangian_psi
 flowmag = np.sqrt(Ufull**2 + Vfull**2) 
 ```
 
-For the vectors, we use a matplotlib quiverplot. It needs similar data, filtered to not have too many vectors and to keep the top of the plot clear.
+For the vectors, I use a matplotlib quiverplot. It needs similar data, filtered to not have too many vectors and to keep the top of the plot clear.
 
 ```python
 # Filter rates
@@ -197,7 +197,7 @@ plt.close(fig)
 
 ### Plot 2: Trajectories
 
-This plot begins similarly to the last one, since we are again using a matplotlib meshgrid. The wave height data (stored under the variable 'Hwave') uses the rho position coordinates.
+This plot begins similarly to the last one, since I am again using a matplotlib meshgrid. The wave height data (stored under the variable 'Hwave') uses the rho position coordinates.
 
 ```python
 # get position coordinates
@@ -219,7 +219,7 @@ ax.pcolormesh(dsCDF.x_psi, dsCDF.y_psi, np.ma.masked_where(dsCDF.mask_psi == 1, 
 wav = ax.pcolormesh(Xrho, Yrho, dsCDF['Hwave'], cmap = cmice_middle)
 ```
 
-In order to draw the trajectories, we need to directly use the trajectory data from the last notebook. This plot uses 1024 particles instead of the usual 1200 for a clearer picture.
+In order to draw the trajectories, I need to directly use the trajectory data from the last notebook. This plot uses 1024 particles instead of the usual 1200 for a clearer picture.
 
 ```python
 chosenparts = np.arange(0, 1025, 1)
@@ -253,7 +253,7 @@ plt.close(fig)
 
 ### Plot 3: Vorticity Computation Comparison
 
-As this plot has two panes, we use plt.subplot, creating each plot on separate axes.
+As this plot has two panes, I use plt.subplot, creating each plot on separate axes.
 
 ```python
 fig, (ax1, ax2) = plt.subplots(nrows = 2, ncols = 1, sharex = True, constrained_layout = True, figsize = (14,14), dpi = 1200) 
@@ -441,7 +441,7 @@ for i in range(len(df['positions'])) :
     ax.contour(X, Y, vort_nofilter, levels = levels, linewidths = 0.25, alpha = 0.5, colors = "k")
 
 
-    # adds a scatterplot of the positions of particles at the timestep we are plotting
+    # adds a scatterplot of the positions of particles at the timestep being plotted
     ax.scatter(df.loc[i].positions[:,0], df.loc[i].positions[:,1], s = 0.15, color = "k", zorder = 15)  # s = 0.25
     
     # t
@@ -472,7 +472,7 @@ for i in range(len(df['positions'])) :
     plt.close(fig)
 ```
 
-At this point, we have a folder with all of the plot images in it. The following FFmpeg command-line code generates the final animated gif:
+At this point, I have a folder with all of the plot images in it. The following FFmpeg command-line code generates the final animated gif:
 
 ```bash
 # from https://stackoverflow.com/questions/58832085/colors-messed-up-distorted-when-making-a-gif-from-png-files-using-ffmpeg

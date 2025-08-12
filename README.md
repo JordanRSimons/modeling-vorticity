@@ -12,7 +12,7 @@ The animation below shows an example of simulated buoys, also called test partic
 This repository contains an overview of Python modeling and data visualization done during a summer research project in applied physics and oceanography at the University of Washington.
 
 * ['notebooks/01_visualizations_and_results'](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/01_visualizations_and_results.md): A discussion of my results and a showcase of plots and animations and the code that produced them
-* ['notebooks/02_generate_particle_data.md](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md): A technical explanation of my approach to modeling vorticity
+* ['notebooks/02_generate_particle_data.md'](https://github.com/JordanRSimons/modeling-vorticity/blob/main/notebooks/02_generate_particle_data.md): A technical explanation of my approach to modeling vorticity
 * ['images/'](https://github.com/JordanRSimons/modeling-vorticity/tree/main/images): A directory with all plots and animations as standalone files
 * ['poster/JordanCICOESPoster.pdf'](https://github.com/JordanRSimons/modeling-vorticity/blob/main/poster/JordanCICOESPoster.pdf): My research poster, created in Microsoft PowerPoint
 * [YouTube Video](https://www.youtube.com/watch?v=HQ3oBR151bI): A lighthearted 2-minute video introduction to the project intended for the general public
